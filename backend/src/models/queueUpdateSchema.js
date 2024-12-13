@@ -1,12 +1,25 @@
 import mongoose from 'mongoose';
 
-const queueSchema = new mongoose.Schema(
+const queueUpdateSchema = new mongoose.Schema(
   {
+    hospital_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hospital',
+      required: true,
+    },
     queue_positions: [
       {
         queue_id: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Queue',
+          required: true,
+        },
+        position: {
+          type: Number,
+          required: true,
+        },
+        expected_time: {
+          type: Date,
           required: true,
         },
       },
@@ -17,4 +30,4 @@ const queueSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model('Queue', queueSchema);
+export default mongoose.model('QueueUpdate', queueUpdateSchema);

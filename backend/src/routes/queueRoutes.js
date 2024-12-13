@@ -1,17 +1,16 @@
-import { Router } from 'express';
-import {
-  addToQueue,
-  removeFromQueue,
-  getQueueStatus,
-  getEstimatedWaitTime
-} from '../controllers/queueController.js';
-import auth from '../middleware/auth.js';
+import express from 'express';
+import { 
+  addToQueue, 
+  getNextInQueue, 
+  getQueuesByPatient,
+  processNextInQueue 
+} from '../controllers/queueController';
 
-const router = Router();
+const router = express.Router();
 
-router.post('/add', auth, addToQueue);
-router.post('/remove', auth, removeFromQueue);
-router.get('/status', auth, getQueueStatus);
-router.get('/wait-time', auth, getEstimatedWaitTime);
+router.post('/add', addToQueue);
+router.get('/next/:hospital_id', getNextInQueue);
+router.get('/patient/:patient_account', getQueuesByPatient);
+router.post('/process/:hospital_id', processNextInQueue);
 
-export default router; 
+export default router;

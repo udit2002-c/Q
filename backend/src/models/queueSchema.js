@@ -7,24 +7,44 @@ const queueSchema = new mongoose.Schema(
       ref: 'Hospital',
       required: true,
     },
-    type: {
-      type: String,
-      enum: ['GENERAL', 'EMERGENCY'],
+    patient_account: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Patient',
       required: true,
     },
-    patients: [
-      {
-        patient_id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Patient',
-        },
-        facility_type: {
-          type: String,
-          enum: ['GENERAL', 'PRIVATE', 'ICU', 'EMERGENCY'],
-          required: true,
-        },
+    admitted_patient_details: {
+      name: {
+        type: String,
+        required: true,
       },
-    ],
+      date_of_birth: {
+        type: Date,
+        required: true,
+      },
+      gender: {
+        type: String,
+        enum: ['MALE', 'FEMALE', 'OTHER'],
+        required: true,
+      },
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    token: {
+      type: Number,
+      required: true,
+      unique: true,
+      default: Math.floor(Math.random() * 1000000),
+    },
+    doctor_assigned: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Doctor',
+    },
+    is_opd_done: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

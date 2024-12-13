@@ -1,157 +1,186 @@
-import Queue from '../models/queueSchema.js';
-import { ApiError } from '../utils/ApiError.js';
-import { ApiResponse } from '../utils/ApiResponse.js';
-import mongoose from 'mongoose';
+import Queue from '../models/queueSchema';
+import QueueUpdate from '../models/queueUpdateSchema';
+import Doctor from '../models/doctorSchema';
 
-// Add patient to queue
 export const addToQueue = async (req, res) => {
   try {
-    const { hospital_id, patient_id, facility_type } = req.body;
+    const { hospital_id, patient_details, description } = req.body;
 
-    if (!hospital_id || !patient_id || !facility_type) {
-      throw new ApiError(400, 'All fields are required');
-    }
-
-    const queueType = facility_type === 'EMERGENCY' ? 'EMERGENCY' : 'GENERAL';
-
-    // Find existing queue or create new one
-    let queue = await Queue.findOne({ 
+    // Create new queue entry
+    const newQueue = await Queue.create({
       hospital_id,
-      type: queueType
+      patient_details,
+      description,
     });
 
-    if (!queue) {
-      queue = await Queue.create({
+    // Find or create queue update for this hospital
+    let queueUpdate = await QueueUpdate.findOne({ hospital_id });
+
+    if (!queueUpdate) {
+      queueUpdate = await QueueUpdate.create({
         hospital_id,
-        type: queueType,
-        patients: []
+        queue_positions: [],
       });
     }
 
-    // For emergency queue, add patient to the front
-    if (queueType === 'EMERGENCY') {
-      queue.patients.unshift({
-        patient_id,
-        facility_type,
-        priority: 'HIGH'
-      });
-    } else {
-      // For general queue, add to the end
-      queue.patients.push({
-        patient_id,
-        facility_type,
-        priority: 'NORMAL'
-      });
-    }
-
-    await queue.save();
-
-    return res.status(201).json(
-      new ApiResponse(201, 'Added to queue successfully', queue)
-    );
-  } catch (error) {
-    throw new ApiError(500, error.message);
-  }
-};
-
-// Remove patient from queue (when appointment completed)
-export const removeFromQueue = async (req, res) => {
-  try {
-    const { hospital_id, patient_id, queue_type } = req.body;
-
-    if (!queue_type) {
-      throw new ApiError(400, 'Queue type is required');
-    }
-
-    const queue = await Queue.findOne({ 
-      hospital_id,
-      type: queue_type
+    // Add new queue to the end of queue_positions
+    const newPosition = queueUpdate.queue_positions.length + 1;
+    queueUpdate.queue_positions.push({
+      queue_id: newQueue._id,
+      position: newPosition,
     });
-    
-    if (!queue) {
-      throw new ApiError(404, 'Queue not found');
-    }
 
-    // Remove patient from queue (FIFO)
-    queue.patients = queue.patients.filter(
-      patient => patient.patient_id.toString() !== patient_id
-    );
+    await queueUpdate.save();
 
-    await queue.save();
-
-    return res.status(200).json(
-      new ApiResponse(200, 'Removed from queue successfully', queue)
-    );
+    res.status(201).json({
+      success: true,
+      data: {
+        queue: newQueue,
+        position: newPosition,
+      },
+    });
   } catch (error) {
-    throw new ApiError(500, error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
-// Get queue status for both emergency and general queues
-export const getQueueStatus = async (req, res) => {
+export const getNextInQueue = async (req, res) => {
   try {
-    const { hospital_id } = req.query;
+    const { hospital_id } = req.params;
 
-    const [emergencyQueue, generalQueue] = await Promise.all([
-      Queue.findOne({ hospital_id, type: 'EMERGENCY' })
-        .populate('patients.patient_id', 'name')
-        .lean(),
-      Queue.findOne({ hospital_id, type: 'GENERAL' })
-        .populate('patients.patient_id', 'name')
-        .lean()
-    ]);
-
-    const formatQueue = (queue) => {
-      if (!queue) return { total: 0, patients: [] };
-      
-      return {
-        total: queue.patients.length,
-        patients: queue.patients.map((patient, index) => ({
-          ...patient,
-          position: index + 1
-        }))
-      };
-    };
-
-    return res.status(200).json(
-      new ApiResponse(200, 'Queue status fetched successfully', {
-        emergency: formatQueue(emergencyQueue),
-        general: formatQueue(generalQueue)
-      })
+    const queueUpdate = await QueueUpdate.findOne({ hospital_id }).populate(
+      'queue_positions.queue_id'
     );
+
+    if (!queueUpdate || queueUpdate.queue_positions.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No patients in queue',
+      });
+    }
+
+    const nextPatient = queueUpdate.queue_positions[0].queue_id;
+
+    res.status(200).json({
+      success: true,
+      data: nextPatient,
+    });
   } catch (error) {
-    throw new ApiError(500, error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
-// Get estimated wait time
-export const getEstimatedWaitTime = async (req, res) => {
+// Get all queue status by patient_account
+export const getQueuesByPatient = async (req, res) => {
   try {
-    const { hospital_id, queue_type } = req.query;
+    const { patient_account } = req.params;
 
-    const queue = await Queue.findOne({ 
-      hospital_id,
-      type: queue_type
-    }).lean();
+    const queues = await Queue.find({ patient_account })
+      .populate('hospital_id', 'display_name address')
+      .sort({ createdAt: -1 });
 
-    if (!queue) {
-      return res.status(200).json(
-        new ApiResponse(200, 'No queue found', { waitTime: 0 })
-      );
-    }
+    // Get queue positions for each queue
+    const queueDetails = await Promise.all(
+      queues.map(async (queue) => {
+        const queueUpdate = await QueueUpdate.findOne({
+          hospital_id: queue.hospital_id,
+          'queue_positions.queue_id': queue._id,
+        });
 
-    // Estimated time per patient (in minutes)
-    const timePerPatient = queue_type === 'EMERGENCY' ? 20 : 15;
-    const waitTime = queue.patients.length * timePerPatient;
+        const position = queueUpdate
+          ? queueUpdate.queue_positions.find(
+              (pos) => pos.queue_id.toString() === queue._id.toString()
+            )?.position
+          : null;
 
-    return res.status(200).json(
-      new ApiResponse(200, 'Wait time calculated successfully', {
-        queueLength: queue.patients.length,
-        estimatedWaitTime: waitTime,
-        timeUnit: 'minutes'
+        return {
+          ...queue.toObject(),
+          position,
+        };
       })
     );
+
+    res.status(200).json({
+      success: true,
+      data: queueDetails,
+    });
   } catch (error) {
-    throw new ApiError(500, error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
-}; 
+};
+
+// Assign doctor based on shift
+const assignDoctor = async (hospitalId) => {
+  const currentHour = new Date().getHours();
+  const shift = currentHour >= 10 && currentHour < 15 ? 'morning' : 'evening';
+
+  // Only assign if time is within working hours (10 AM to 8 PM)
+  if (currentHour < 10 || currentHour >= 20) {
+    return null;
+  }
+
+  const availableDoctor = await Doctor.findOne({
+    hospital_id: hospitalId,
+    duty: shift,
+  }).sort({ updatedAt: 1 }); // Get least recently assigned doctor
+
+  return availableDoctor?._id;
+};
+
+// Process next in queue
+export const processNextInQueue = async (req, res) => {
+  try {
+    const { hospital_id } = req.params;
+
+    const queueUpdate = await QueueUpdate.findOne({ hospital_id })
+      .populate('queue_positions.queue_id');
+
+    if (!queueUpdate || queueUpdate.queue_positions.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No patients in queue',
+      });
+    }
+
+    // Get the next patient in queue
+    const nextPosition = queueUpdate.queue_positions[0];
+    const assignedDoctor = await assignDoctor(hospital_id);
+
+    if (!assignedDoctor) {
+      return res.status(400).json({
+        success: false,
+        message: 'No doctors available for current shift',
+      });
+    }
+
+    // Update queue update with assigned doctor
+    queueUpdate.doctor_assigned = assignedDoctor;
+    await queueUpdate.save();
+
+    // Remove the processed patient from queue
+    queueUpdate.queue_positions.shift();
+    await queueUpdate.save();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        patient: nextPosition.queue_id,
+        assigned_doctor: assignedDoctor,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};

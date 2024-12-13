@@ -7,29 +7,18 @@ const bedSchema = new mongoose.Schema(
       ref: 'Hospital',
       required: true,
     },
-    // patient_id: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'Patient'
-    // },
-
-    beds: {
-      count: {
-        type: Number,
-        required: true,
-      },
-      facility_type: {
-        type: String,
-        enum: ['GENERAL', 'PRIVATE', 'SEMI-PRIVATE', 'EMERGENCY'],
-        required: true,
-      },
+    patient_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Patient',
     },
-    // is_available: {
-    //   type: Boolean,
-    //   default: true
-    // },
-    // departure_time: {
-    //   type: Date,
-    // },
+    bedNo: {
+      type: Number,
+      required: true,
+    },
+    is_available: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

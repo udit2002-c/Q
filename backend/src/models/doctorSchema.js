@@ -1,33 +1,32 @@
 import mongoose from 'mongoose';
 
-const doctorSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
+const doctorSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    contact_number: {
+      type: String,
+      required: true,
+    },
+
+    qualification: {
+      type: String,
+      required: true,
+    },
+    experience_years: {
+      type: Number,
+      required: true,
+    },
+    duty: {
+      type: String,
+      enum: ['morning', 'evening'],
+    },
   },
-  department_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Department',
-    required: true
-  },
-  contact_number: {
-    type: String,
-    required: true
-  },
-  date_of_birth: {
-    type: Date,
-    required: true
-  },
-  qualification: {
-    type: String,
-    required: true
-  },
-  experience_years: {
-    type: Number,
-    required: true
+  {
+    timestamps: true,
   }
-}, {
-  timestamps: true
-});
+);
 
 export default mongoose.model('Doctor', doctorSchema);
