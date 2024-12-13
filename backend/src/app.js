@@ -16,6 +16,7 @@ import bedRouter from "./routes/bedRoutes.js";
 import inventoryRouter from "./routes/inventoryRoutes.js";
 import departmentRoutes from './routes/department.routes.js';
 import doctorRoutes from './routes/doctor.routes.js';
+import queueRoutes from './routes/queueRoutes.js';
 
 // routes declaration
 app.use("/api/v1/beds", bedRouter);
