@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import React,{ useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import BillingForm from '@/components/ui/billing-form'
 
 // Mock data based on the queueSchema
 const mockQueue = [
@@ -20,9 +22,22 @@ const supportedInsurances = ["HealthGuard", "MediShield"]
 export default function QueueManagement() {
   const [queue, setQueue] = useState(mockQueue)
   const [filter, setFilter] = useState('')
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [currentPatient, setCurrentPatient] = useState<typeof mockQueue[0] | null>(null)
 
-  const handleAttendPatient = (patientId: string) => {
-    setQueue(queue.filter(patient => patient._id !== patientId))
+  const handleAttendPatient = (patient: typeof mockQueue[0]) => {
+    setCurrentPatient(patient)
+    setIsFormOpen(true)
+  }
+
+  const handleFormSubmit = (formData: any) => {
+    // Here you would typically send the form data to your backend
+    console.log('Form submitted:', formData)
+    // You can add additional logic here to calculate total price if needed
+    // Remove the patient from the queue
+    setQueue(queue.filter(p => p._id !== currentPatient?._id))
+    setIsFormOpen(false)
+    setCurrentPatient(null)
   }
 
   const filteredQueue = queue.filter(patient => 
@@ -79,7 +94,7 @@ export default function QueueManagement() {
                   </TableCell>
                   <TableCell>{patient.caseType}</TableCell>
                   <TableCell>
-                    <Button onClick={() => handleAttendPatient(patient._id)}>Attend</Button>
+                    <Button onClick={() => handleAttendPatient(patient)}>Attend</Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -87,6 +102,18 @@ export default function QueueManagement() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Patient Billing</DialogTitle>
+            <DialogDescription>
+              Enter billing details for OPD consultation, medicines, and lab tests for {currentPatient?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <BillingForm onSubmit={handleFormSubmit} patientName={currentPatient?.name || ''} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
