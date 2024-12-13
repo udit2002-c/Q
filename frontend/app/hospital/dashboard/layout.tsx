@@ -38,6 +38,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <Building className="h-5 w-5 mr-2" />
             Departments
           </Link>
+          <Link href="/hospital/dashboard/addStaffs" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200">
+            <Users className="h-5 w-5 mr-2" />
+            Staffs
+          </Link>
         </nav>
         <div className="absolute bottom-4 left-4">
           <Button variant="ghost" className="flex items-center text-gray-700 hover:bg-gray-200">
