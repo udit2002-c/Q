@@ -1,16 +1,10 @@
 import express from 'express';
-import { 
-  addToQueue, 
-  getNextInQueue, 
-  getQueuesByPatient,
-  processNextInQueue 
-} from '../controllers/queueController';
+import { addToQueue, getQueueStatus, completeOPD } from '../controllers/queueController.js';
 
 const router = express.Router();
 
 router.post('/add', addToQueue);
-router.get('/next/:hospital_id', getNextInQueue);
-router.get('/patient/:patient_account', getQueuesByPatient);
-router.post('/process/:hospital_id', processNextInQueue);
+router.get('/status', getQueueStatus);
+router.post('/complete', completeOPD);
 
 export default router;

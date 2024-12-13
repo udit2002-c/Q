@@ -1,186 +1,126 @@
-import Queue from '../models/queueSchema';
-import QueueUpdate from '../models/queueUpdateSchema';
-import Doctor from '../models/doctorSchema';
+import Queue from '../models/queueSchema.js';
+import QueueUpdate from '../models/queueUpdateSchema.js';
+import Doctor from '../models/doctorSchema.js';
+
+const PATIENTS_PER_SHIFT = 10;
+const SHIFTS = {
+  MORNING: { start: 9, end: 13 }, // 9 AM to 1 PM
+  EVENING: { start: 14, end: 18 }, // 2 PM to 6 PM
+};
+
+const getCurrentShift = () => {
+  const hour = new Date().getHours();
+  if (hour >= SHIFTS.MORNING.start && hour < SHIFTS.MORNING.end) return 'MORNING';
+  if (hour >= SHIFTS.EVENING.start && hour < SHIFTS.EVENING.end) return 'EVENING';
+  return null;
+};
+
+const getNextAvailableSlot = async (hospitalId) => {
+  const currentShift = getCurrentShift();
+  const currentDate = new Date();
+  
+  // Get all queue updates for today and tomorrow
+  const queueUpdates = await QueueUpdate.find({
+    hospital_id: hospitalId,
+    'queue_positions.expected_time': {
+      $gte: new Date(currentDate.setHours(0, 0, 0, 0)),
+      $lte: new Date(currentDate.setDate(currentDate.getDate() + 2)),
+    },
+  });
+
+  // Get available doctors
+  const doctors = await Doctor.find({ hospital_id: hospitalId });
+  
+  // Calculate next available slot
+  // ... (implementation details for slot calculation)
+  
+  return {
+    doctorId: availableDoctor._id,
+    expectedTime: slotTime,
+  };
+};
 
 export const addToQueue = async (req, res) => {
   try {
-    const { hospital_id, patient_details, description } = req.body;
-
-    // Create new queue entry
-    const newQueue = await Queue.create({
+    const { hospital_id, patient_account, admitted_patient_details, description } = req.body;
+    
+    // Find next available slot
+    const { doctorId, expectedTime } = await getNextAvailableSlot(hospital_id);
+    
+    // Create queue entry
+    const queue = new Queue({
       hospital_id,
-      patient_details,
+      patient_account,
+      admitted_patient_details,
       description,
+      doctor_assigned: doctorId,
     });
-
-    // Find or create queue update for this hospital
-    let queueUpdate = await QueueUpdate.findOne({ hospital_id });
-
-    if (!queueUpdate) {
-      queueUpdate = await QueueUpdate.create({
-        hospital_id,
-        queue_positions: [],
-      });
-    }
-
-    // Add new queue to the end of queue_positions
-    const newPosition = queueUpdate.queue_positions.length + 1;
-    queueUpdate.queue_positions.push({
-      queue_id: newQueue._id,
-      position: newPosition,
-    });
-
-    await queueUpdate.save();
-
-    res.status(201).json({
-      success: true,
-      data: {
-        queue: newQueue,
-        position: newPosition,
+    await queue.save();
+    
+    // Update queue positions
+    await QueueUpdate.findOneAndUpdate(
+      { hospital_id },
+      {
+        $push: {
+          queue_positions: {
+            queue_id: queue._id,
+            position: position,
+            expected_time: expectedTime,
+          },
+        },
       },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
-  }
-};
-
-export const getNextInQueue = async (req, res) => {
-  try {
-    const { hospital_id } = req.params;
-
-    const queueUpdate = await QueueUpdate.findOne({ hospital_id }).populate(
-      'queue_positions.queue_id'
+      { upsert: true }
     );
-
-    if (!queueUpdate || queueUpdate.queue_positions.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No patients in queue',
-      });
-    }
-
-    const nextPatient = queueUpdate.queue_positions[0].queue_id;
-
-    res.status(200).json({
-      success: true,
-      data: nextPatient,
-    });
+    
+    res.status(201).json(queue);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Get all queue status by patient_account
-export const getQueuesByPatient = async (req, res) => {
+export const getQueueStatus = async (req, res) => {
   try {
-    const { patient_account } = req.params;
-
-    const queues = await Queue.find({ patient_account })
-      .populate('hospital_id', 'display_name address')
-      .sort({ createdAt: -1 });
-
-    // Get queue positions for each queue
-    const queueDetails = await Promise.all(
-      queues.map(async (queue) => {
-        const queueUpdate = await QueueUpdate.findOne({
-          hospital_id: queue.hospital_id,
-          'queue_positions.queue_id': queue._id,
-        });
-
-        const position = queueUpdate
-          ? queueUpdate.queue_positions.find(
-              (pos) => pos.queue_id.toString() === queue._id.toString()
-            )?.position
-          : null;
-
-        return {
-          ...queue.toObject(),
-          position,
-        };
-      })
-    );
-
-    res.status(200).json({
-      success: true,
-      data: queueDetails,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
-  }
-};
-
-// Assign doctor based on shift
-const assignDoctor = async (hospitalId) => {
-  const currentHour = new Date().getHours();
-  const shift = currentHour >= 10 && currentHour < 15 ? 'morning' : 'evening';
-
-  // Only assign if time is within working hours (10 AM to 8 PM)
-  if (currentHour < 10 || currentHour >= 20) {
-    return null;
-  }
-
-  const availableDoctor = await Doctor.findOne({
-    hospital_id: hospitalId,
-    duty: shift,
-  }).sort({ updatedAt: 1 }); // Get least recently assigned doctor
-
-  return availableDoctor?._id;
-};
-
-// Process next in queue
-export const processNextInQueue = async (req, res) => {
-  try {
-    const { hospital_id } = req.params;
-
+    const { patient_account, hospital_id } = req.query;
+    
     const queueUpdate = await QueueUpdate.findOne({ hospital_id })
       .populate('queue_positions.queue_id');
-
-    if (!queueUpdate || queueUpdate.queue_positions.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No patients in queue',
-      });
+      
+    // Find patient's position and waiting list
+    const position = queueUpdate.queue_positions
+      .find(pos => pos.queue_id.patient_account.toString() === patient_account);
+      
+    if (!position) {
+      return res.status(404).json({ message: 'Patient not found in queue' });
     }
-
-    // Get the next patient in queue
-    const nextPosition = queueUpdate.queue_positions[0];
-    const assignedDoctor = await assignDoctor(hospital_id);
-
-    if (!assignedDoctor) {
-      return res.status(400).json({
-        success: false,
-        message: 'No doctors available for current shift',
-      });
-    }
-
-    // Update queue update with assigned doctor
-    queueUpdate.doctor_assigned = assignedDoctor;
-    await queueUpdate.save();
-
-    // Remove the processed patient from queue
-    queueUpdate.queue_positions.shift();
-    await queueUpdate.save();
-
-    res.status(200).json({
-      success: true,
-      data: {
-        patient: nextPosition.queue_id,
-        assigned_doctor: assignedDoctor,
-      },
+    
+    const patientsAhead = queueUpdate.queue_positions
+      .filter(pos => pos.expected_time < position.expected_time).length;
+    
+    res.json({
+      position: position.position,
+      expected_time: position.expected_time,
+      patients_ahead: patientsAhead,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const completeOPD = async (req, res) => {
+  try {
+    const { queue_id, hospital_id } = req.body;
+    
+    // Update queue entry
+    await Queue.findByIdAndUpdate(queue_id, { is_opd_done: true });
+    
+    // Remove from queue positions
+    await QueueUpdate.findOneAndUpdate(
+      { hospital_id },
+      { $pull: { queue_positions: { queue_id } } }
+    );
+    
+    res.json({ message: 'OPD visit completed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
