@@ -17,7 +17,7 @@ export default function LoginPage() {
     // Here you would typically send a request to your backend to authenticate the user
     console.log("Logging in:", { email, password })
     // For now, we'll just redirect to the dashboard
-    router.push("/dashboard")
+    router.push("/nurse/dashboard")
   }
 
   return (

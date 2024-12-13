@@ -29,7 +29,7 @@ export default function LoginPage() {
         title: "Login successful",
         description: "Welcome back!",
       })
-      router.push('/dashboard')
+      router.push('/pharmacist/dashboard')
     }, 2000)
   }
 
