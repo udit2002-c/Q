@@ -22,11 +22,11 @@ export default function Dashboard() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [staffList, setStaffList] = useState<StaffList>({
     nurses: [
-      { id: 1, name: 'John Doe', detail: 'Emergency' },
-      { id: 2, name: 'Jane Smith', detail: 'Pediatrics' },
+      { id: 1, name: 'Udit Tewari', detail: 'Emergency' },
+      { id: 2, name: 'Shikhi Chandrashekar', detail: 'Pediatrics' },
     ],
     maintainers: [
-      { id: 1, name: 'Bob Johnson', detail: 'Electrical' },
+      { id: 1, name: 'Ram Mishra', detail: 'Electrical' },
       { id: 2, name: 'Alice Brown', detail: 'Plumbing' },
     ],
     supportStaff: [

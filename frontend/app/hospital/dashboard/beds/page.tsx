@@ -10,7 +10,7 @@ import { Plus, Minus } from 'lucide-react'
 const bedCategories = ['General', 'Emergency', 'Private', 'Semi Private']
 
 const initialBedCounts = {
-  General: 50,
+  General: 49,
   Emergency: 15,
   Private: 20,
   'Semi Private': 30,
