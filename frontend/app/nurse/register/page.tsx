@@ -18,7 +18,7 @@ export default function RegisterPage() {
     // Here you would typically send a request to your backend to register the user
     console.log("Registering:", { name, email, password })
     // For now, we'll just redirect to the login page
-    router.push("/login")
+    router.push("/nurse/login")
   }
 
   return (

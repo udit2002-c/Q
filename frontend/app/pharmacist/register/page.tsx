@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/hooks/use-toast"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -31,7 +31,7 @@ export default function RegisterPage() {
         title: "Registration successful",
         description: "You can now login to your account",
       })
-      router.push('/login')
+      router.push('/pharmacist/login')
     }, 2000)
   }
 

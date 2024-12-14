@@ -31,7 +31,7 @@ export default function Register() {
     // Here you would typically send the data to your backend
     console.log(formData)
     // Redirect to login page after successful registration
-    router.push("/login")
+    router.push("/doctor/login")
   }
 
   return (
@@ -76,7 +76,7 @@ export default function Register() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={() => router.push("/login")}>Login</Button>
+          <Button variant="outline" onClick={() => router.push("/doctor/login")}>Login</Button>
           <Button type="submit" onClick={handleSubmit}>Register</Button>
         </CardFooter>
       </Card>

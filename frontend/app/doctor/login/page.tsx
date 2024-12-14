@@ -48,7 +48,7 @@ export default function Login() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={() => router.push("/register")}>Register</Button>
+          <Button variant="outline" onClick={() => router.push("/doctor/register")}>Register</Button>
           <Button type="submit" onClick={handleSubmit}>Login</Button>
         </CardFooter>
       </Card>
