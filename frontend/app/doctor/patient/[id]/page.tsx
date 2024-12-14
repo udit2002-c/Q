@@ -14,7 +14,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 // Dummy data for patient details
 const patientDetails = {
   id: 1,
-  name: "John Doe",
+  name: "Udit Tewari",
   dob: "1990-01-01",
   gender: "MALE",
   stage: "WAITING",

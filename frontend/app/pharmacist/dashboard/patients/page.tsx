@@ -16,7 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 const initialPatients = [
   {
     id: 1,
-    name: "John Doe",
+    name: "Udit Tewari",
     date_of_birth: "1990-01-01",
     gender: "MALE",
     description: "Regular checkup",
@@ -43,7 +43,7 @@ const initialPatients = [
   },
   {
     id: 2,
-    name: "Jane Smith",
+    name: "Suhani H",
     date_of_birth: "1985-05-15",
     gender: "FEMALE",
     description: "Chronic condition follow-up",
@@ -79,7 +79,7 @@ const initialPatients = [
   },
   {
     id: 3,
-    name: "Mike Johnson",
+    name: "Suhas B M",
     date_of_birth: "1978-11-30",
     gender: "MALE",
     description: "Post-surgery follow-up",

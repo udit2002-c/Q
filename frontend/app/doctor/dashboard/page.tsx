@@ -8,9 +8,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
 // Dummy data for patients
 const patients = [
-  { id: 1, name: "John Doe", dob: "1990-01-01", gender: "MALE", stage: "WAITING" },
-  { id: 2, name: "Jane Smith", dob: "1985-05-15", gender: "FEMALE", stage: "CONSULTING" },
-  { id: 3, name: "Bob Johnson", dob: "1978-11-30", gender: "MALE", stage: "ADMITTED" },
+  { id: 1, name: "Udit Tewari", dob: "1990-01-01", gender: "MALE", stage: "WAITING" },
+  { id: 2, name: "Yash Gupta", dob: "1985-05-15", gender: "FEMALE", stage: "CONSULTING" },
+  { id: 3, name: "Sreelaksmi Nair", dob: "1978-11-30", gender: "MALE", stage: "ADMITTED" },
 ]
 
 export default function Dashboard() {

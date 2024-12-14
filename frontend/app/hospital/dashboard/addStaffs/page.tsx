@@ -27,11 +27,11 @@ export default function Dashboard() {
     ],
     maintainers: [
       { id: 1, name: 'Ram Mishra', detail: 'Electrical' },
-      { id: 2, name: 'Alice Brown', detail: 'Plumbing' },
+      { id: 2, name: 'Yash Gupta', detail: 'Plumbing' },
     ],
     supportStaff: [
-      { id: 1, name: 'Charlie Davis', detail: 'Receptionist' },
-      { id: 2, name: 'Eva Wilson', detail: 'IT Support' },
+      { id: 1, name: 'Suraj Prakash', detail: 'Receptionist' },
+      { id: 2, name: 'Tanbir Ahamed', detail: 'IT Support' },
     ],
   })
 
