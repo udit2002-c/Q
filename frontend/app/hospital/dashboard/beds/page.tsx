@@ -19,7 +19,7 @@ const initialBedCounts = {
 export default function BedsManagement() {
   const [bedCounts, setBedCounts] = useState(initialBedCounts)
   const [beds, setBeds] = useState([
-    { id: 1, number: "101", type: "General", status: "Occupied", patient: "John Doe" },
+    { id: 1, number: "101", type: "General", status: "Occupied", patient: "Udit Tewari" },
     { id: 2, number: "102", type: "Emergency", status: "Available", patient: "-" },
     { id: 3, number: "103", type: "General", status: "Maintenance", patient: "-" },
     { id: 4, number: "201", type: "Private", status: "Occupied", patient: "Jane Smith" },
