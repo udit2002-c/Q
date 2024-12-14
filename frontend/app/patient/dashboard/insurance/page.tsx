@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 const insuranceClaims = [
-  { id: 1, date: "2023-05-10", description: "Annual Checkup", amount: "$150", status: "Approved" },
-  { id: 2, date: "2023-04-15", description: "Prescription Medication", amount: "$50", status: "Pending" },
-  { id: 3, date: "2023-03-20", description: "Specialist Consultation", amount: "$200", status: "Approved" },
+  { id: 1, date: "2023-05-10", description: "Annual Checkup", amount: "₹150", status: "Approved" },
+  { id: 2, date: "2023-04-15", description: "Prescription Medication", amount: "₹50", status: "Pending" },
+  { id: 3, date: "2023-03-20", description: "Specialist Consultation", amount: "₹200", status: "Approved" },
 ]
 
 export default function Insurance() {

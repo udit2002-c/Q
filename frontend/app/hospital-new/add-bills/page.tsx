@@ -67,7 +67,7 @@ export default function AddBillsPage() {
           {bills.map((bill) => (
             <li key={bill.id} className="bg-gray-100 p-4 rounded">
               <p><strong>Name:</strong> {bill.name}</p>
-              <p><strong>Price:</strong> ${bill.price.toFixed(2)}</p>
+              <p><strong>Price:</strong> ₹{bill.price.toFixed(2)}</p>
               <p><strong>Description:</strong> {bill.description}</p>
             </li>
           ))}
