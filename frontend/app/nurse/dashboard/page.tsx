@@ -8,8 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 // Mock data for patients
 const patients = [
-  { id: 1, name: "John Doe", dateOfBirth: "1990-01-01", gender: "MALE", description: "General checkup" },
-  { id: 2, name: "Jane Smith", dateOfBirth: "1985-05-15", gender: "FEMALE", description: "Routine examination" },
+  { id: 1, name: "Udit Tewari", dateOfBirth: "1990-01-01", gender: "MALE", description: "General checkup",bed:"A11" },
+  { id: 2, name: "Jane Smith", dateOfBirth: "1985-05-15", gender: "FEMALE", description: "Routine examination",bed:"A12" },
   // Add more mock patients as needed
 ]
 
@@ -48,6 +48,7 @@ export default function DashboardPage() {
                 <TableHead>Date of Birth</TableHead>
                 <TableHead>Gender</TableHead>
                 <TableHead>Description</TableHead>
+                <TableHead>Bed assigned</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -57,6 +58,7 @@ export default function DashboardPage() {
                   <TableCell>{patient.dateOfBirth}</TableCell>
                   <TableCell>{patient.gender}</TableCell>
                   <TableCell>{patient.description}</TableCell>
+                  <TableCell>{patient.bed}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 // Mock data for a single patient
 const patient = {
   id: 1,
-  name: "John Doe",
+  name: "Udit Tewari",
   dateOfBirth: "1990-01-01",
   gender: "MALE",
   description: "General checkup",
