@@ -11,7 +11,7 @@ import BillingForm from '@/components/ui/billing-form'
 
 // Mock data based on the queueSchema
 const mockQueue = [
-  { _id: '1', patient_id: 'P001', name: "John Doe", age: 35, gender: "Male", condition: "Fever", facility_type: 'GENERAL', assignedOn: new Date('2023-05-20T10:00:00'), insurance: "HealthGuard", caseType: "general" },
+  { _id: '1', patient_id: 'P001', name: "Udit Tewari", age: 21, gender: "Male", condition: "Fever", facility_type: 'GENERAL', assignedOn: new Date('2023-05-20T10:00:00'), insurance: "HealthGuard", caseType: "general" },
   { _id: '2', patient_id: 'P002', name: "Jane Smith", age: 28, gender: "Female", condition: "Sprained ankle", facility_type: 'GENERAL', assignedOn: new Date('2023-05-20T10:30:00'), insurance: "MediShield", caseType: "general" },
   { _id: '3', patient_id: 'P003', name: "Bob Johnson", age: 45, gender: "Male", condition: "Chest pain", facility_type: 'EMERGENCY', assignedOn: new Date('2023-05-20T11:00:00'), insurance: "CarePlus", caseType: "emergency" },
 ]
