@@ -2,7 +2,6 @@
 
 A modern, comprehensive healthcare queue management system built with Next.js, React, TypeScript, and Tailwind CSS. CareQ streamlines patient appointments, reduces wait times, and provides efficient healthcare service management for hospitals, doctors, patients, and healthcare staff.
 
-![CareQ Banner](https://via.placeholder.com/1200x400/3b82f6/ffffff?text=CareQ+Healthcare+Management+System)
 
 ## 🎯 Overview
 
